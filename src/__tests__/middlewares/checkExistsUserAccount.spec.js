@@ -2,14 +2,14 @@ const { v4 } = require('uuid');
 
 const {
   users,
-  findUserById
+  checkExistsUserAccount
 } = require('../../index');
 
 let response
 let request
 let mockNext
 
-describe('findUserById', () => {
+describe('checkExistsUserAccount', () => {
   beforeEach(() => {
     users.splice(0, users.length)
 
@@ -42,43 +42,39 @@ describe('findUserById', () => {
     mockNext = jest.fn()
   })
 
-  it('should be able to find user by id route param and pass it to request.user', () => {
-    const user = {
+  it('should be able to find user by username in header and pass it to request.user', () => {
+    users.push({
       id: v4(),
       name: 'Atlas',
       username: 'atlas',
       pro: false,
       todos: []
-    }
+    })
 
-    users.push(user)
-
-    const mockRequest = request({ params: { id: user.id } })
     const mockUserSetter = jest.fn((userData) => { this.user = userData })
+
+    const mockRequest = request({ headers: { username: 'atlas' } })
     mockRequest.__defineSetter__('user', mockUserSetter)
 
     const mockResponse = response()
 
-    findUserById(mockRequest, mockResponse, mockNext)
+    checkExistsUserAccount(mockRequest, mockResponse, mockNext)
 
-    expect(mockUserSetter).toBeCalledWith(
-      expect.objectContaining(user)
-    )
     expect(mockNext).toBeCalled()
+    expect(mockUserSetter).toBeCalledWith(
+      expect.objectContaining({
+        name: 'Atlas',
+        username: 'atlas',
+      })
+    )
   })
 
-  it('should not be able to pass user to request.user when it does not exists', () => {
-    const mockRequest = request({ params: { id: v4() } })
-    const mockUserSetter = jest.fn((userData) => { this.user = userData })
-    mockRequest.__defineSetter__('user', mockUserSetter)
-
+  it('should not be able to find a non existing user by username in header', () => {
+    const mockRequest = request({ headers: { username: 'non-existing-username' } })
     const mockResponse = response()
 
-    findUserById(mockRequest, mockResponse, mockNext)
+    checkExistsUserAccount(mockRequest, mockResponse, mockNext)
 
     expect(mockResponse.status).toBeCalledWith(404)
-
-    expect(mockUserSetter).not.toBeCalled()
-    expect(mockNext).not.toBeCalled()
   })
 })

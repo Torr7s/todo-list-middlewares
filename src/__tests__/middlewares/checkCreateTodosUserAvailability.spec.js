@@ -1,23 +1,23 @@
-const { v4 } = require('uuid');
+const { v4 } = require('uuid')
 
 const {
   users,
-  checksCreateTodosUserAvailability
-} = require('../../');
+  checkCreateTodosUserAvailability
+} = require('../../index');
 
-let response;
-let request;
-let mockNext;
+let response
+let request
+let mockNext
 
-describe('checksCreateTodosUserAvailability', () => {
+describe('checkCreateTodosUserAvailability', () => {
   beforeEach(() => {
-    users.splice(0, users.length);
+    users.splice(0, users.length)
 
     request = (params) => {
       return {
         ...params
       }
-    };
+    }
 
     response = () => {
       const response = {}
@@ -27,20 +27,20 @@ describe('checksCreateTodosUserAvailability', () => {
           ...response,
           statusCode: code
         }
-      });
+      })
 
       response.json = jest.fn((obj) => {
         return {
           ...response,
           body: obj
         }
-      });
+      })
 
-      return response;
-    };
+      return response
+    }
 
-    mockNext = jest.fn();
-  });
+    mockNext = jest.fn()
+  })
 
   it('should be able to let user create a new todo when is in free plan and have less than ten todos', () => {
     const mockRequest = request({
@@ -51,14 +51,14 @@ describe('checksCreateTodosUserAvailability', () => {
         pro: false,
         todos: []
       }
-    });
+    })
 
-    const mockResponse = response();
+    const mockResponse = response()
 
-    checksCreateTodosUserAvailability(mockRequest, mockResponse, mockNext);
+    checkCreateTodosUserAvailability(mockRequest, mockResponse, mockNext)
 
-    expect(mockNext).toBeCalled();
-  });
+    expect(mockNext).toBeCalled()
+  })
 
   it('should not be able to let user create a new todo when is not Pro and already have ten todos', () => {
     const mockRequest = request({
@@ -75,14 +75,14 @@ describe('checksCreateTodosUserAvailability', () => {
           created_at: new Date()
         }))
       }
-    });
+    })
 
-    const mockResponse = response();
+    const mockResponse = response()
 
-    checksCreateTodosUserAvailability(mockRequest, mockResponse, mockNext);
+    checkCreateTodosUserAvailability(mockRequest, mockResponse, mockNext)
 
-    expect(mockResponse.status).toBeCalledWith(403);
-  });
+    expect(mockResponse.status).toBeCalledWith(403)
+  })
 
   it('should be able to let user create infinite new todos when is in Pro plan', () => {
     const mockRequest = request({
@@ -99,12 +99,12 @@ describe('checksCreateTodosUserAvailability', () => {
           created_at: new Date()
         })),
       }
-    });
+    })
 
-    const mockResponse = response();
+    const mockResponse = response()
 
-    checksCreateTodosUserAvailability(mockRequest, mockResponse, mockNext);
+    checkCreateTodosUserAvailability(mockRequest, mockResponse, mockNext)
 
-    expect(mockNext).toBeCalled();
-  });
+    expect(mockNext).toBeCalled()
+  })
 })

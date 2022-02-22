@@ -1,3 +1,5 @@
-const { app } = require('./');
+const { app } = require('./index')
 
-app.listen(3333);
+app.listen(3030, () => {
+  console.log('Server is running.')
+})
